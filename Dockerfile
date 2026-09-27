@@ -13,4 +13,4 @@ COPY . .
 RUN mkdir -p /data
 
 EXPOSE 5001
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "2", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "2", "--access-logfile", "-", "app:app"]

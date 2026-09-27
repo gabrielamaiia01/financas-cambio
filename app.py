@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import date, datetime
 
@@ -11,6 +12,9 @@ from cliente_awesome_api import (
     buscar_cotacao_atual,
     buscar_cotacao_historica,
 )
+
+logging.basicConfig(level=logging.INFO, format="[cambio] %(message)s")
+log = logging.getLogger("cambio")
 
 app = Flask(__name__)
 app.json.ensure_ascii = False
@@ -57,6 +61,7 @@ def obter_cotacao():
 
         em_cache = buscar_no_cache(moeda, data)
         if em_cache is not None:
+            log.info("%s em %s: encontrada no cache (sem chamar a AwesomeAPI)", moeda, data)
             return jsonify(
                 {
                     "moeda": moeda,
@@ -67,6 +72,7 @@ def obter_cotacao():
                 }
             ), 200
 
+        log.info("%s em %s: não está no cache, consultando a AwesomeAPI", moeda, data)
         try:
             resultado = buscar_cotacao_historica(moeda, data)
         except MoedaInvalidaError:
@@ -93,6 +99,7 @@ def obter_cotacao():
         ), 200
 
     # Sem data: cotação em tempo real, sempre buscada na API (não cacheada)
+    log.info("%s cotação atual: consultando a AwesomeAPI", moeda)
     try:
         resultado = buscar_cotacao_atual(moeda)
     except MoedaInvalidaError:
